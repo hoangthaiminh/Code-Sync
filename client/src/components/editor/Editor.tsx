@@ -10,6 +10,7 @@ import { SocketEvent } from "@/types/socket"
 import { color } from "@uiw/codemirror-extensions-color"
 import { hyperLink } from "@uiw/codemirror-extensions-hyper-link"
 import { LanguageName, loadLanguage } from "@uiw/codemirror-extensions-langs"
+import { cpp } from "@codemirror/lang-cpp"
 import CodeMirror, {
     Extension,
     ViewUpdate,
@@ -19,6 +20,11 @@ import { EditorView } from "@codemirror/view"
 import { useEffect, useMemo, useState, useRef, useCallback } from "react"
 import toast from "react-hot-toast"
 import { collaborativeHighlighting, updateRemoteUsers } from "./collaborativeHighlighting"
+
+const customLanguages: Record<string, Extension> = {
+  cpp: cpp(),
+  "c++": cpp(),
+}
 
 function Editor() {
     const { users, currentUser } = useAppContext()
@@ -112,7 +118,9 @@ function Editor() {
             EditorView.updateListener.of(handleSelectionChange),
             scrollPastEnd(),
         ]
-        const langExt = loadLanguage(language.toLowerCase() as LanguageName)
+        const key = language.toLowerCase()
+        const langExt = customLanguages[key] ??
+          loadLanguage(key as LanguageName)
         if (langExt) {
             extensions.push(langExt)
         } else {
